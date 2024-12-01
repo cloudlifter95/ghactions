@@ -60,3 +60,5 @@ jobs:
       - name: Print all env vars
         run: |
           printenv
+      - name: Output Inputs
+        run: echo "${{ toJSON(github.event.inputs) }}"
