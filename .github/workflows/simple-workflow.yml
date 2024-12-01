@@ -43,14 +43,14 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
-      - name: Print all env vars
-        run: |
-          printenv
       - name: Output Inputs
         run: echo "${{ toJSON(github.event.inputs) }}"
       - id: random-number-generator
         run: echo "random-id=$(echo $RANDOM)" >> $GITHUB_OUTPUT
         shell: bash
+      - name: Print all env vars
+        run: |
+          printenv
 
   build2:
     # The type of runner that the job will run on
@@ -60,6 +60,9 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - env:
+          OUTPUT1: ${{needs.build.outputs.random-number-generator}}
+        run: echo "$OUTPUT1"
       - uses: actions/checkout@v4
       - name: Print all env vars
         run: |
