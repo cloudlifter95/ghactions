@@ -46,6 +46,8 @@ jobs:
       - name: Print all env vars
         run: |
           printenv
+      - name: Output Inputs
+        run: echo "${{ toJSON(github.event.inputs) }}"
 
   build2:
     # The type of runner that the job will run on
