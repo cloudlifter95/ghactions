@@ -48,6 +48,9 @@ jobs:
           printenv
       - name: Output Inputs
         run: echo "${{ toJSON(github.event.inputs) }}"
+      - id: random-number-generator
+        run: echo "random-id=$(echo $RANDOM)" >> $GITHUB_OUTPUT
+        shell: bash
 
   build2:
     # The type of runner that the job will run on
@@ -62,3 +65,4 @@ jobs:
           printenv
       - name: Output Inputs
         run: echo "${{ toJSON(github.event.inputs) }}"
+      
