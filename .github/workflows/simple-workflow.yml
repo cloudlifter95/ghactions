@@ -131,7 +131,7 @@ jobs:
         container: ['ubuntu:16.04', 'ubuntu:20.04']
     steps:
       - name: Install lsb-release
-        run: sudo apt-get -qq update && sudo apt-get -qq install -y lsb-release
+        run: apt-get -qq update && apt-get -qq install -y lsb-release
   
       - name: Run lsb_release -a
         run: |
