@@ -120,7 +120,7 @@ jobs:
         run: |
           cat /etc/debian_version
           lsb_release -a
-          
+
   build3: # job = vm of flavor <runs-on>. container enables the job (and therefore all its steps) to run within <container>.
     needs: build2
     name: Build on ${{matrix.container }}
@@ -128,7 +128,7 @@ jobs:
     container: ${{ matrix.container }}
     strategy:
       matrix:
-        container: ['ubuntu:16.04', 'ubuntu:18.04']
+        container: ['ubuntu:16.04', 'ubuntu:20.04']
     steps:
       - name: Install lsb-release
         run: apt-get -qq update && apt-get -qq install -y lsb-release
