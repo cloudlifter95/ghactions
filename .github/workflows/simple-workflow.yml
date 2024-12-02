@@ -29,7 +29,9 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     outputs:
-      output1: ${{ steps.random-number-generator.outputs.random-id }}
+      output1: ${{ steps.random-number-generator.outputs.randomid }}
+    env:
+      myjobenv1: myjobenv1
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -39,6 +41,11 @@ jobs:
       # Runs a single command using the runners shell
       - name: Run a one-line script
         run: echo Hello, world!
+      
+      - name: Get current config
+        run: |
+          pwd
+          ls
 
       # Runs a set of commands using the runners shell
       - name: Run a multi-line script
@@ -48,27 +55,85 @@ jobs:
       - name: Output Inputs
         run: echo "${{ toJSON(github.event.inputs) }}"
       - id: random-number-generator
-        run: echo "random-id=$(echo $RANDOM)" >> $GITHUB_OUTPUT
+        run: |
+          echo "randomid=$(echo $RANDOM)" >> $GITHUB_OUTPUT
+          echo "randomidenv=$(echo $RANDOM)" >> $GITHUB_ENV
         shell: bash
+      - name: Check GITHUB_OUTPUT FILE
+        run: |
+          echo $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
       - name: Print all env vars
         run: |
           printenv
+      - name: Test
+        run: |
+          echo $randomidenv
+          echo "here: ${{ steps.random-number-generator.outputs.randomid }}"
+          # exit 1
 
   build2:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     needs: build
+    env:
+      myjobenv: myjobenv
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - env:
           OUTPUT1: ${{needs.build.outputs.output1}}
-        run: echo "$OUTPUT1"
+        run: |
+          echo "$OUTPUT1"
       - uses: actions/checkout@v4
+      - name: Output Inputs
+        run: echo "${{ toJSON(github.event.inputs) }}"
+      - name: Check GITHUB_OUTPUT FILE
+        run: |
+          echo $GITHUB_OUTPUT
+          cat $GITHUB_ENV
+          echo $randomidenv
+          echo $mystepenv
+          echo $myjobenv
+        env:
+          mystepenv: mystepenv
+      - id: set-multi-line-output
+        name: Set multi line output
+        run: |
+          echo 'multi_line<<EOF' >> $GITHUB_ENV
+          echo '' >> $GITHUB_ENV
+          echo 'multi' >> $GITHUB_ENV
+          echo 'line' >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
       - name: Print all env vars
         run: |
           printenv
-      - name: Output Inputs
-        run: echo "${{ toJSON(github.event.inputs) }}"
-      
+      - name: Use multi-line output
+        run: |
+          echo "Multi-line output:"
+          echo "${{ env.multi_line }}"
+          echo "::debug::hello"
+      - name: Install lsb-release
+        run: apt-get -qq update && apt-get -qq install -y lsb-release
+      - name: Run lsb_release -a
+        run: |
+          cat /etc/debian_version
+          lsb_release -a
+          
+  build3: # job = vm of flavor <runs-on>. container enables the job (and therefore all its steps) to run within <container>.
+    needs: build2
+    name: Build on ${{matrix.container }}
+    runs-on: ubuntu-latest
+    container: ${{ matrix.container }}
+    strategy:
+      matrix:
+        container: ['ubuntu:16.04', 'ubuntu:18.04']
+    steps:
+      - name: Install lsb-release
+        run: apt-get -qq update && apt-get -qq install -y lsb-release
+  
+      - name: Run lsb_release -a
+        run: |
+          cat /etc/debian_version
+          lsb_release -a
