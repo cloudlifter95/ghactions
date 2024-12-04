@@ -114,26 +114,39 @@ jobs:
           echo "Multi-line output:"
           echo "${{ env.multi_line }}"
           echo "::debug::hello"
-      - name: Install lsb-release
-        run: sudo apt-get -qq update && sudo apt-get -qq install -y lsb-release
-      - name: Run lsb_release -a
+      - name: Hello world action step
+        uses: ./actions/hello-world-docker-action # Uses an action in the root directory
+        id: hello
+        with:
+          who-to-greet: 'Mona the Octocat'
+      - name: using docker outputs
         run: |
-          cat /etc/debian_version
-          lsb_release -a
+          echo "FIND ME: ${{ steps.hello.outputs.redirected_input }}"
+          echo "FIND ME: ${{ steps.hello.outputs.time }}"
+      - name: Print all env vars
+        run: |
+          printenv
+      # - name: Install lsb-release
+      #   run: sudo apt-get -qq update && sudo apt-get -qq install -y lsb-release
+      # - name: Run lsb_release -a
+      #   run: |
+      #     cat /etc/debian_version
+      #     lsb_release -a
 
-  build3: # job = vm of flavor <runs-on>. container enables the job (and therefore all its steps) to run within <container>.
-    needs: build2
-    name: Build on ${{matrix.container }}
-    runs-on: ubuntu-latest
-    container: ${{ matrix.container }}
-    strategy:
-      matrix:
-        container: ['ubuntu:16.04', 'ubuntu:20.04']
-    steps:
-      - name: Install lsb-release
-        run: apt-get -qq update && apt-get -qq install -y lsb-release
+
+  # build3: # job = vm of flavor <runs-on>. container enables the job (and therefore all its steps) to run within <container>.
+  #   needs: build2
+  #   name: Build on ${{matrix.container }}
+  #   runs-on: ubuntu-latest
+  #   container: ${{ matrix.container }}
+  #   strategy:
+  #     matrix:
+  #       container: ['ubuntu:16.04', 'ubuntu:20.04']
+  #   steps:
+  #     - name: Install lsb-release
+  #       run: apt-get -qq update && apt-get -qq install -y lsb-release
   
-      - name: Run lsb_release -a
-        run: |
-          cat /etc/debian_version
-          lsb_release -a
+  #     - name: Run lsb_release -a
+  #       run: |
+  #         cat /etc/debian_version
+  #         lsb_release -a
